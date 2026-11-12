@@ -648,11 +648,14 @@
         // Live test-certificate badge
         fetch('/api/v1/test-certificate').then((r) => (r.ok ? r.json() : null)).then((cert) => {
             if (!cert) return;
-            ws.querySelectorAll('span').forEach((s) => {
-                if (/Verified Production Tests/.test(s.textContent) && s.children.length) {
-                    const passed = cert.tests_run - cert.failures - cert.errors;
-                    s.lastChild.textContent = ` ${passed}/${cert.tests_run} Verified Production Tests`;
-                }
+            const passed = cert.tests_run - cert.failures - cert.errors;
+            const walker = document.createTreeWalker(ws, NodeFilter.SHOW_TEXT);
+            const hits = [];
+            while (walker.nextNode()) {
+                if (/\d+\s*\/\s*\d+\s+Verified Production Tests/.test(walker.currentNode.nodeValue)) hits.push(walker.currentNode);
+            }
+            hits.forEach((n) => {
+                n.nodeValue = n.nodeValue.replace(/\d+\s*\/\s*\d+(\s+Verified Production Tests)/, `${passed}/${cert.tests_run}$1`);
             });
         }).catch(() => {});
 

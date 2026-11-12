@@ -81,6 +81,23 @@ class TestMenuDrivenNavigation(unittest.TestCase):
             if f"key: '{key}', kind: 'custom'" in self.nav_js:
                 self.assertIn(f"'{key}': ", self.nav_js, f"Custom view '{key}' has no renderer")
 
+    def test_portal_javascript_has_no_syntax_errors(self):
+        """A single stray backtick inside a template literal blanks every page; guard against it."""
+        import shutil
+        import subprocess
+        import tempfile
+        node = shutil.which("node")
+        if not node:
+            self.skipTest("node not installed")
+        scripts = re.findall(r"<script>(.*?)</script>", self.index_html, re.S)
+        sources = {"index.html inline script": max(scripts, key=len), "navigation.js": self.nav_js}
+        for name, src in sources.items():
+            with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as tmp:
+                tmp.write(src)
+            res = subprocess.run([node, "--check", tmp.name], capture_output=True, text=True)
+            os.unlink(tmp.name)
+            self.assertEqual(res.returncode, 0, f"{name} has a JS syntax error:\n{res.stderr[:800]}")
+
     def test_prototypes_endpoint(self):
         resp = self.client.get("/api/v1/prototypes")
         self.assertEqual(resp.status_code, 200)
