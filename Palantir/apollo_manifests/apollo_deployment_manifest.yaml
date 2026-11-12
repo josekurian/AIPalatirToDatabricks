@@ -1,0 +1,31 @@
+schemaVersion: "apollo.palantir.com/v1"
+kind: DeploymentManifest
+metadata:
+  name: foundry-supply-chain-service
+  environment: us-east-sovereign-cloud
+spec:
+  release:
+    product: "com.palantir.foundry.operations:supply-chain-suite"
+    version: "4.12.0"
+    channel: "stable"
+  targetCluster:
+    kubernetesNamespace: "operations-prod"
+    clusterType: "AWS_EKS"
+  deploymentConstraints:
+    maxUnavailableReplicas: 0
+    maintenanceWindows:
+      - "Sunday 02:00-04:00 UTC"
+    cveVulnerabilityPolicy:
+      blockOnCriticalCve: true
+      maxAllowedHighCve: 0
+  verificationGates:
+    canarySteps:
+      - duration: "15m"
+        trafficPercentage: 10
+        metrics:
+          - errorRateThreshold: "< 0.01%"
+          - p99LatencyMs: "< 150ms"
+      - duration: "30m"
+        trafficPercentage: 50
+    postDeployHooks:
+      - runSmokeTests: "curl -f http://supply-chain-service/healthz"

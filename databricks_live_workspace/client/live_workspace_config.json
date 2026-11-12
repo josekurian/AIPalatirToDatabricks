@@ -1,0 +1,13 @@
+{
+  "user_email": "hybridgenai@gmail.com",
+  "workspace_id": "7474649578236440",
+  "account_id": "c98bdd7d-c782-4d45-9ebc-47458f9ed667",
+  "cloud_provider": "AWS",
+  "region": "us-east-2",
+  "workspace_host": "https://dbc-fe2b9eb9-5caf.cloud.databricks.com",
+  "launch_url": "https://dbc-fe2b9eb9-5caf.cloud.databricks.com/?email=hybridgenai%40gmail.com&intent=SIGN_UP&dbx_source=www&autoLogin=true&account_id=c98bdd7d-c782-4d45-9ebc-47458f9ed667&o=7474649578236440",
+  "open_sharing_id": "aws:us-east-2:0a6cc551-4c15-44a3-8a44-5090cee441c9",
+  "delta_sharing_recipient": "palantir_oracle_migration_recipient",
+  "auth_type": "PAT_OR_OAUTH",
+  "token_env_var": "DATABRICKS_TOKEN"
+}

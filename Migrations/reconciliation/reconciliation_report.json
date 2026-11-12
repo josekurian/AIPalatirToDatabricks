@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "source_row_count": 3,
+  "target_row_count": 3,
+  "count_discrepancy": 0,
+  "missing_keys_count": 0,
+  "unexpected_keys_count": 0,
+  "attribute_mismatch_count": 0,
+  "overall_parity_percentage": 100.0
+}

@@ -1,0 +1,64 @@
+{
+  "workshopApplication": {
+    "appId": "supply-chain-command-center",
+    "title": "Global Supply Chain Operations Command Center",
+    "layout": {
+      "type": "THREE_PANE_COCKPIT",
+      "header": {
+        "title": "Supply Chain Disruption & Expedite Cockpit",
+        "kpis": [
+          { "label": "Active Shortages", "metric": "count(SupplyOrder[stock_shortage_flag == true])" },
+          { "label": "Revenue at Risk", "metric": "sum(SupplyOrder[stock_shortage_flag == true].order_total_usd)" },
+          { "label": "Mean Expedite Latency", "metric": "avg(expedite_duration_hours)" }
+        ]
+      },
+      "leftPane": {
+        "title": "Shortage Order Worklist",
+        "widget": "OBJECT_LIST",
+        "targetObjectType": "SupplyOrder",
+        "filter": "stock_shortage_flag == true AND fulfillment_status != 'CANCELLED'",
+        "sort": "order_total_usd DESC",
+        "displayedFields": ["order_id", "customer_id", "sku_id", "order_total_usd", "requested_delivery_date"]
+      },
+      "centerPane": {
+        "title": "Order Digital Twin & Inventory Map",
+        "widgets": [
+          {
+            "type": "OBJECT_DETAILS_CARD",
+            "binding": "selectedSupplyOrder",
+            "showLinkedObjects": ["customer_to_supply_orders", "order_to_inventory_asset"]
+          },
+          {
+            "type": "GEOSPATIAL_MAP",
+            "layers": [
+              { "layer": "WarehouseLocations", "source": "WarehouseInventory" },
+              { "layer": "CustomerDestination", "source": "Customer" }
+            ]
+          }
+        ]
+      },
+      "rightPane": {
+        "title": "Kinetic Operational Actions & AIP Recommendations",
+        "widgets": [
+          {
+            "type": "AIP_ASSIST_EMBEDDED_PROMPT",
+            "agentBinding": "SupplyChainDisruptionAgent",
+            "inputContext": "selectedSupplyOrder"
+          },
+          {
+            "type": "ACTION_BUTTON",
+            "action": "reallocateInventoryAndExpedite",
+            "parameters": {
+              "orderId": "$selectedSupplyOrder.order_id",
+              "sourceWarehouseId": "$recommendedWarehouse.warehouse_id",
+              "destinationWarehouseId": "$selectedSupplyOrder.warehouse_id",
+              "reallocationQuantity": "$selectedSupplyOrder.ordered_quantity",
+              "expediteReason": "$userFormInput.reason"
+            },
+            "uiVariant": "PRIMARY_DANGER"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+bundle:
+  name: supply_chain_lakehouse_bundle
+
+targets:
+  dev:
+    workspace:
+      host: https://enterprise-dev.cloud.databricks.com
+  prod:
+    workspace:
+      host: https://enterprise-prod.cloud.databricks.com
+
+resources:
+  pipelines:
+    supply_chain_pipeline:
+      name: "[prod] supply_chain_dlt_pipeline"
+      target: enterprise_operations_gold
+      libraries:
+        - notebook:
+            path: ../dlt_pipelines/supply_chain_dlt_pipeline.py
+      edition: ADVANCED
+      channel: CURRENT
+      continuous: false
+
+  jobs:
+    supply_chain_daily_workflow:
+      name: "[prod] supply_chain_daily_orchestration"
+      tasks:
+        - task_key: run_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.supply_chain_pipeline.id}
+      schedule:
+        quartz_cron_expression: "0 0 4 * * ?"
+        timezone_id: "UTC"

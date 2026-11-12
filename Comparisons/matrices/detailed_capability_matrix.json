@@ -1,0 +1,97 @@
+{
+  "comparison_metadata": {
+    "generated_at": "2026-11-10T06:55:00Z",
+    "version": "2.0.0",
+    "evaluation_standard": "Enterprise Data & AI Architecture Review"
+  },
+  "scores": {
+    "palantir_overall": 8.4,
+    "databricks_overall": 9.1
+  },
+  "categories": [
+    {
+      "category": "Data Storage & Open Ecosystem",
+      "weight": 0.15,
+      "palantir": {
+        "score": 6.8,
+        "strengths": ["Managed indexing", "Seamless virtual tables"],
+        "weaknesses": ["Proprietary format lock-in", "High egress barrier"]
+      },
+      "databricks": {
+        "score": 9.8,
+        "strengths": ["100% open Delta Lake & Apache Iceberg (UniForm)", "Zero lock-in", "Delta Sharing open protocol"],
+        "weaknesses": ["Requires cloud bucket administration"]
+      }
+    },
+    {
+      "category": "Processing & Computational Scalability",
+      "weight": 0.15,
+      "palantir": {
+        "score": 7.5,
+        "strengths": ["Embedded Spark execution", "Automated build DAGs"],
+        "weaknesses": ["Proprietary wrapper overhead", "Opaque memory profiling"]
+      },
+      "databricks": {
+        "score": 9.7,
+        "strengths": ["Photon C++ vectorized execution", "Serverless auto-scaling", "Sub-second SQL TPC-DS leader"],
+        "weaknesses": ["Multi-cluster concurrency configuration complexity"]
+      }
+    },
+    {
+      "category": "Semantic Modeling & Operational Write-Backs",
+      "weight": 0.20,
+      "palantir": {
+        "score": 9.8,
+        "strengths": ["Mature Foundry Ontology (Objects, Links, Actions)", "Built-in kinetic reverse-ETL write-backs to ERPs"],
+        "weaknesses": ["Steep learning curve for TypeScript action functions"]
+      },
+      "databricks": {
+        "score": 8.0,
+        "strengths": ["Unity Catalog 3-level namespace", "Semantic partner layers (Cube, dbt)", "Databricks Apps write-back"],
+        "weaknesses": ["No out-of-the-box object graph traversal UI"]
+      }
+    },
+    {
+      "category": "Operational Applications & Cockpits",
+      "weight": 0.15,
+      "palantir": {
+        "score": 9.6,
+        "strengths": ["Palantir Workshop WYSIWYG builder", "Rapid drag-and-drop operational dashboards in days"],
+        "weaknesses": ["Limited custom front-end framework flexibility compared to pure web frameworks"]
+      },
+      "databricks": {
+        "score": 8.2,
+        "strengths": ["Databricks Apps (Python Streamlit, Dash, Gradio, FastAPI)", "AI/BI Dashboards & Genie"],
+        "weaknesses": ["Requires Python code authoring for custom operational forms"]
+      }
+    },
+    {
+      "category": "Generative AI & Agentic Systems",
+      "weight": 0.15,
+      "palantir": {
+        "score": 8.8,
+        "strengths": ["Palantir AIP Agent Studio", "Tight human-in-the-loop guardrails linked to Ontology Actions"],
+        "weaknesses": ["Less flexible for deep custom model fine-tuning"]
+      },
+      "databricks": {
+        "score": 9.4,
+        "strengths": ["Mosaic AI Agent Framework", "Managed Vector Search", "Model Serving & Evaluation", "Custom fine-tuning (DBRX, Llama 3)"],
+        "weaknesses": ["Requires programmatic setup of multi-agent chains"]
+      }
+    },
+    {
+      "category": "Total Cost of Ownership (TCO) & Licensing",
+      "weight": 0.20,
+      "palantir": {
+        "score": 6.2,
+        "strengths": ["Bundled all-in-one software capabilities"],
+        "weaknesses": ["High fixed annual contracts ($1M-$10M+)", "Foundry Compute Units premium", "Heavy FDE service costs"]
+      },
+      "databricks": {
+        "score": 9.4,
+        "strengths": ["Pure consumption pricing (DBUs)", "Scale-to-zero serverless compute", "100% cost transparency via System Tables"],
+        "weaknesses": ["Requires proactive FinOps monitoring to prevent runaway queries"]
+      }
+    }
+  ]
+}

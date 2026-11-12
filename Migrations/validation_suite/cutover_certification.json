@@ -1,0 +1,14 @@
+{
+  "migration_run_id": "mig_cutover_prod_20261110_01",
+  "status": "CERTIFIED_FOR_PRODUCTION",
+  "source_system": "Palantir Foundry (Tenant: corp-foundry-prod)",
+  "target_system": "Databricks Lakehouse (Catalog: enterprise_operations)",
+  "datasets_reconciled": [
+    "dim_customers",
+    "fact_supply_chain_orders",
+    "dim_inventory"
+  ],
+  "parity_score": "100.0%",
+  "security_policy_applied": "Unity Catalog ABAC + Masking Filters",
+  "timestamp_utc": "2026-11-10T12:57:14Z"
+}

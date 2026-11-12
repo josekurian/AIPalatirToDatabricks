@@ -1,0 +1,48 @@
+{
+  "agentSpec": {
+    "name": "SupplyChainDisruptionAgent",
+    "version": "1.4.0",
+    "description": "Autonomous Palantir AIP Agent monitoring supply chain bottlenecks, proposing stock reallocation, and executing guarded actions.",
+    "modelBinding": {
+      "provider": "Anthropic",
+      "model": "claude-3-5-sonnet",
+      "temperature": 0.1,
+      "maxOutputTokens": 2048,
+      "meshEndpoint": "https://aip-mesh.foundry.corp.internal/v1/models/claude-3-5"
+    },
+    "systemInstructions": "You are the Enterprise Supply Chain Disruption Agent within Palantir AIP. Your goal is to detect supply chain shortages, evaluate warehouse alternatives, and formulate expedited reallocations. You must strictly obey Human-in-the-Loop policies for any financial impact exceeding $50,000.",
+    "ontologyBindings": {
+      "accessibleObjects": ["Customer", "SupplyOrder", "WarehouseInventory"],
+      "accessibleActions": [
+        {
+          "actionApiName": "reallocateInventoryAndExpedite",
+          "requiresHumanConfirmation": true,
+          "guardrailCondition": "order.orderTotalUsd > 50000.0"
+        },
+        {
+          "actionApiName": "triggerAutonomousSafetyReorder",
+          "requiresHumanConfirmation": false,
+          "guardrailCondition": "reorderBatchUnits <= 500.0"
+        }
+      ],
+      "accessibleFunctions": ["calculateDeliveryRisk"]
+    },
+    "logicChains": [
+      {
+        "step": 1,
+        "name": "ShortageIdentification",
+        "description": "Queries Ontology for all SupplyOrder objects where stock_shortage_flag == true"
+      },
+      {
+        "step": 2,
+        "name": "AlternativeStockSearch",
+        "description": "Evaluates neighboring WarehouseInventory objects with available_stock > ordered_quantity"
+      },
+      {
+        "step": 3,
+        "name": "ActionProposalAndExecution",
+        "description": "Invokes reallocateInventoryAndExpedite after presenting cost analysis to operator"
+      }
+    ]
+  }
+}

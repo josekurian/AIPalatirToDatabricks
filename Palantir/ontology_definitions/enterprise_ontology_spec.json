@@ -1,0 +1,140 @@
+{
+  "$schema": "https://palantir.com/schemas/foundry/ontology/v2/ontology-schema.json",
+  "ontology": {
+    "apiName": "enterprise_supply_chain_ontology",
+    "displayName": "Enterprise Operations & Supply Chain Ontology",
+    "description": "Enterprise-grade digital twin for supply chain, inventory, and automated fulfillment operations.",
+    "objectTypes": [
+      {
+        "apiName": "Customer",
+        "displayName": "Enterprise Customer",
+        "primaryKey": "customer_id",
+        "backingDatasource": {
+          "type": "foundry_dataset",
+          "locator": "/Company/Ontology/Clean/dim_customers"
+        },
+        "properties": {
+          "customer_id": { "type": "string", "indexed": true },
+          "customer_name": { "type": "string", "indexed": true },
+          "primary_email": { "type": "string" },
+          "country_code": { "type": "string" },
+          "city": { "type": "string" },
+          "credit_tier": { "type": "string" },
+          "annual_revenue": { "type": "double" },
+          "ontology_sync_status": { "type": "string" }
+        }
+      },
+      {
+        "apiName": "SupplyOrder",
+        "displayName": "Supply Chain Order",
+        "primaryKey": "order_id",
+        "backingDatasource": {
+          "type": "foundry_dataset",
+          "locator": "/Company/Ontology/Clean/fact_supply_chain_orders"
+        },
+        "properties": {
+          "order_id": { "type": "string", "indexed": true },
+          "customer_id": { "type": "string", "indexed": true },
+          "sku_id": { "type": "string", "indexed": true },
+          "warehouse_id": { "type": "string" },
+          "ordered_quantity": { "type": "double" },
+          "order_total_usd": { "type": "double" },
+          "requested_delivery_date": { "type": "timestamp" },
+          "fulfillment_status": { "type": "string" },
+          "stock_shortage_flag": { "type": "boolean" },
+          "high_value_order": { "type": "boolean" }
+        }
+      },
+      {
+        "apiName": "WarehouseInventory",
+        "displayName": "Warehouse Inventory Asset",
+        "primaryKey": "inventory_asset_id",
+        "backingDatasource": {
+          "type": "foundry_dataset",
+          "locator": "/Company/Ontology/Clean/dim_inventory"
+        },
+        "properties": {
+          "inventory_asset_id": { "type": "string", "indexed": true },
+          "warehouse_id": { "type": "string", "indexed": true },
+          "sku_id": { "type": "string", "indexed": true },
+          "available_stock": { "type": "double" },
+          "safety_stock_threshold": { "type": "double" },
+          "reorder_in_progress": { "type": "boolean" }
+        }
+      }
+    ],
+    "linkTypes": [
+      {
+        "apiName": "customer_to_supply_orders",
+        "displayName": "Customer Orders",
+        "sourceObjectType": "Customer",
+        "targetObjectType": "SupplyOrder",
+        "cardinality": "ONE_TO_MANY",
+        "foreignKey": "customer_id"
+      },
+      {
+        "apiName": "order_to_inventory_asset",
+        "displayName": "Allocated Inventory",
+        "sourceObjectType": "SupplyOrder",
+        "targetObjectType": "WarehouseInventory",
+        "cardinality": "MANY_TO_ONE",
+        "foreignKey": "sku_id"
+      }
+    ],
+    "actionTypes": [
+      {
+        "apiName": "reallocateInventoryAndExpedite",
+        "displayName": "Reallocate Inventory and Expedite Order",
+        "description": "Kinetic operational write-back that allocates safety stock from an alternate warehouse and triggers an expedited SAP delivery note.",
+        "parameters": {
+          "orderId": { "type": "string", "required": true },
+          "sourceWarehouseId": { "type": "string", "required": true },
+          "destinationWarehouseId": { "type": "string", "required": true },
+          "reallocationQuantity": { "type": "double", "required": true },
+          "expediteReason": { "type": "string", "required": true }
+        },
+        "operations": [
+          {
+            "type": "EXECUTE_TYPESCRIPT_FUNCTION",
+            "functionLocator": "functions/supply_chain_actions:reallocateStock"
+          },
+          {
+            "type": "MUTATE_OBJECT_PROPERTY",
+            "objectType": "SupplyOrder",
+            "primaryKey": "$orderId",
+            "mutations": {
+              "fulfillment_status": "EXPEDITED_PROCESSING",
+              "stock_shortage_flag": false
+            }
+          },
+          {
+            "type": "DISPATCH_WEBHOOK",
+            "endpoint": "https://sap-gateway.corp.internal/sap/bc/rest/v1/orders/expedite",
+            "method": "POST"
+          }
+        ]
+      },
+      {
+        "apiName": "triggerAutonomousSafetyReorder",
+        "displayName": "Trigger Automated Safety Stock Reorder",
+        "description": "Agent-accessible action triggering purchase requisitions when critical thresholds breach.",
+        "parameters": {
+          "skuId": { "type": "string", "required": true },
+          "warehouseId": { "type": "string", "required": true },
+          "reorderBatchUnits": { "type": "double", "required": true },
+          "authorizingAgentId": { "type": "string", "required": true }
+        },
+        "operations": [
+          {
+            "type": "MUTATE_OBJECT_PROPERTY",
+            "objectType": "WarehouseInventory",
+            "primaryKey": "$skuId",
+            "mutations": {
+              "reorder_in_progress": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
